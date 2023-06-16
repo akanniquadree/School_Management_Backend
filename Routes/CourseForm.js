@@ -1,6 +1,7 @@
 const express = require("express")
 const StudentModel = require("../Model/StudentModel")
 const DepartmentModel = require("../Model/DepartModel")
+const CourseFormModel = require("../Model/CourseFormModel")
 
 
 
@@ -42,6 +43,18 @@ courseFormRouter.post("/courseform/:id", async(req, res)=>{
         if(!student){
             return res.status(422).json({error:"Cannot find Account"})
         }
+        const courses = new CourseFormModel({
+            level:student.level,
+            semester:student.semester,
+            student: student._id,
+            courses: course
+        })
+        const savedCourse = await courses.save()
+        if(savedCourse){
+            await student.updateOne({$push:{courseForm:savedCourse._id}})
+            return res.status(200).json({message:"Courses uploaded successfully"})
+        }
+        return res.status(422).json({error:"Error in Uploading course"})
         
     } catch (error) {
         console.log(error)
@@ -49,7 +62,7 @@ courseFormRouter.post("/courseform/:id", async(req, res)=>{
     }
 })
 
-
+//get submitted course form per semester
 
 
 module.exports = courseFormRouter
