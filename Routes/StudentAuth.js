@@ -16,11 +16,11 @@ sgMail.setApiKey(process.env.SENDGRID_TRANSPORT)
 //Add a student
 studentAuthRouter.post("/register", async(req, res)=>{
     try {
-        const {first_name, last_name,other_name, email, password, conPassword,dob, mobile, faculty, level, depart, profPic, add} = req.body
+        const {first_name, last_name,other_name, email, password, conPassword,dob, mobile, faculty, level,semester, depart, profPic, add} = req.body
         const Faculty = await   FacultyModel.findOne({faculty})
         const Depart = await   DepartmentModel.findOne({name:depart})
         const existEmail = await StudentModel.findOne({email})
-        if(!first_name || !last_name || !email || !password || !conPassword || !dob || !mobile || !faculty || !level || !depart|| !add){
+        if(!first_name || !last_name || !email || !password ||!semester || !conPassword || !dob || !mobile || !faculty || !level || !depart|| !add){
             return res.status(400).json({error:"Please Fill all required field"})
         }
         if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){ 
@@ -44,7 +44,7 @@ studentAuthRouter.post("/register", async(req, res)=>{
         const y = new Date()
         const date = y.getUTCFullYear().toString()
         console.log(date)
-        const user = new StudentModel({first_name,matric:date +"/"+Faculty.facultyCode +"/"+Depart.departCode+"/"+code, last_name,other_name, email,faculty:Faculty._id,depart:Depart._id, password:hashedPassword, dob, mobile,level, profPic, add})
+        const user = new StudentModel({first_name,matric:date +"/"+Faculty.facultyCode +"/"+Depart.departCode+"/"+code, last_name,other_name, semester,email,faculty:Faculty._id,depart:Depart._id, password:hashedPassword, dob, mobile,level, profPic, add})
         const student = await user.save()
         if(student){
             await Depart.updateOne({$push:{students:student._id}})

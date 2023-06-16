@@ -54,6 +54,11 @@ const studentSchema = mongoose.Schema({
         required:true,
         trim:true
     },
+    semester:{
+        type:String,
+        required:true,
+        trim:true
+    },
     add:{
         type:String,
     }, 

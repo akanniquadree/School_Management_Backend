@@ -11,6 +11,7 @@ const fileupload = require('express-fileupload');
 const lecturerAuthRouter = require("./Routes/LecturerAuth")
 const lecturerUserRouter = require("./Routes/LecturerUser")
 const departCourseRouter = require("./Routes/DepartCourse")
+const courseFormRouter = require("./Routes/CourseForm")
 
 
 const app = express()
@@ -44,6 +45,7 @@ app.use("/api/student", StudentUserRouter)
 app.use("/api/lecturer", lecturerUserRouter)
 app.use("/api/auth", lecturerAuthRouter)
 app.use("/api/", departCourseRouter)
+app.use("/api/", courseFormRouter)
 
 
 
