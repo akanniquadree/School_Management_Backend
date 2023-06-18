@@ -2,16 +2,23 @@ const express = require("express")
 const dotenv = require("dotenv")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
-const sgMail = require("@sendgrid/mail")
+const nodemailer = require("nodemailer")
+const mailgun = require("nodemailer-mailgun-transport")
 const crypto = require("crypto")
 const Token = require("../Model/Token")
 const StudentModel = require("../Model/StudentModel")
 const FacultyModel = require("../Model/FacultyModel")
 const DepartmentModel = require("../Model/DepartModel")
 
+
 const studentAuthRouter = express.Router()
 dotenv.config()
-sgMail.setApiKey(process.env.SENDGRID_TRANSPORT)
+const auth = {auth:{
+    api_key:process.env.MAILGUN_API_KEY,
+    domain:process.env.DOMAIN
+}}
+const transporter = nodemailer.createTransport(mailgun(auth))
+
 
 //Add a student
 studentAuthRouter.post("/register", async(req, res)=>{
@@ -55,7 +62,7 @@ studentAuthRouter.post("/register", async(req, res)=>{
                 userId:student._id,
                 expireToken: Date.now() + 360000
             }).save()
-
+            
             const url = `${process.env.BASE_URL}/student/${student._id}/verify/${token.token}`
             const send = {
                 to:student.email,
@@ -68,7 +75,7 @@ studentAuthRouter.post("/register", async(req, res)=>{
                     <p><a href="${url}">${url}</a></p>
                 `
             }
-        const succes =  sgMail.send(send)
+        const succes =  transporter.sendMail(send)
         if(succes){
                 return res.status(201).json({message: "A mail has been sent to your Email, please verify your email"})
             }
@@ -89,7 +96,7 @@ studentAuthRouter.post("/login", async(req, res)=>{
     try {
         const {email, password} = req.body
         //Checking for either the email or username and password field if they are empty 
-        let conditions = (email.indexOf("@") === -1) ? {matric:email} : {email:email} 
+        let conditions = (email && email.indexOf("@") === -1) ? {matric:email} : {email:email} 
         if(!conditions || !password) {
             return res.status(422).json({error:"Please fill all fields"})
         }
@@ -124,7 +131,7 @@ studentAuthRouter.post("/login", async(req, res)=>{
                          <p><a href="${url}">${url}</a></p>
                      `
                  }
-                 sgMail.send(send).then(sent=>{
+                 transporter.sendMail(send).then(sent=>{
                      return res.status(201).json({message: "A mail has been sent to your Email, please verify your email "})
                  }, error => {
                     console.error(error);
@@ -148,7 +155,7 @@ studentAuthRouter.post("/login", async(req, res)=>{
                                 <p><a href="${url}">${url}</a></p>
                             `
                         }
-                        sgMail.send(send).then(sent=>{
+                        transporter.sendMail(send).then(sent=>{
                             return res.status(201).json({message: "You havent verify your email, A mail has been sent to your Email, please verify your email "})
                         }, error => {
                         console.error(error);
@@ -163,8 +170,8 @@ studentAuthRouter.post("/login", async(req, res)=>{
 
         //     //Token that will be sent to the client
          if(student.verify){
-          const tokenHeader = jwt.sign({_id:student._id},process.env.JWT_HEADER)
-          const {password,verify,...others} = user._doc
+          const tokenHeader = jwt.sign({_id:student._id},process.env.JWT_HEADER, {expiresIn:"5h"})
+          const {password,verify,...others} = student._doc
           return res.status(200).json({tokenHeader, others})
          }
     } catch (error) {
@@ -228,7 +235,7 @@ studentAuthRouter.post("/resetPassword", async(req, res)=>{
                         <a href=${url}>${url}</a>
                         <p>Link expires in an hour</p>`
             }
-            sgMail.send(send).then(sent=>{
+            transporter.sendMail(send).then(sent=>{
                 return res.status(201).json({message:"Check Your email to reset your password"})
             })
         }

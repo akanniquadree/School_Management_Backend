@@ -2,6 +2,7 @@ const express = require("express")
 const StudentModel = require("../Model/StudentModel")
 const DepartmentModel = require("../Model/DepartModel")
 const CourseFormModel = require("../Model/CourseFormModel")
+const { StudentLogin, IsAuth } = require("../Middlewares/Middleware")
 
 
 
@@ -11,7 +12,7 @@ const courseFormRouter = express.Router()
 
 
 //get all courses of a student according to department level and semester
-courseFormRouter.get("/courseform/:id", async(req, res)=>{
+courseFormRouter.get("/courseform/:id", StudentLogin,IsAuth,async(req, res)=>{
     try {
         const student = await StudentModel.findById(req.params.id)
         const depart = await DepartmentModel.findOne({students:req.params.id}).populate("courses")
@@ -33,7 +34,7 @@ courseFormRouter.get("/courseform/:id", async(req, res)=>{
 })
 
 //save course form
-courseFormRouter.post("/courseform/:id", async(req, res)=>{
+courseFormRouter.post("/courseform/:id", StudentLogin,IsAuth, async(req, res)=>{
     try {
         const {course} = req.body
         if(!course){
@@ -46,7 +47,7 @@ courseFormRouter.post("/courseform/:id", async(req, res)=>{
         const courses = new CourseFormModel({
             level:student.level,
             semester:student.semester,
-            student: student._id,
+            students: student._id,
             courses: course
         })
         const savedCourse = await courses.save()
@@ -62,7 +63,32 @@ courseFormRouter.post("/courseform/:id", async(req, res)=>{
     }
 })
 
-//get submitted course form per semester
+//get submitted course form per semester //UserId
+courseFormRouter.get("/courseform/student/:id", StudentLogin,IsAuth, async(req, res)=>{
+    try {
+        const course = await CourseFormModel.findOne({students:req.params.id}).populate("courses")
+        if(!course){
+            return res.status(422).json({error:"Cannot find Account"})
+        }
+        return res.status(200).json(course)
+    } catch (error) {
+        console.log(error)
+            return res.status(500).json(error)
+    }
+})
 
+//get all submitted course form //UserId
+courseFormRouter.get("/courseforms/student/:id",  StudentLogin,IsAuth, async(req, res)=>{
+    try {
+        const course = await CourseFormModel.findById({students:req.params.id}).sort("-createdAt").populate("courseForm")
+        if(!course){
+            return res.status(422).json({error:"Cannot find Account"})
+        }
+        return res.status(200).json(course)
+    } catch (error) {
+        console.log(error)
+            return res.status(500).json(error)
+    }
+})
 
 module.exports = courseFormRouter

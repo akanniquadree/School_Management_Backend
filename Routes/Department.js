@@ -2,13 +2,15 @@ const express = require("express")
 const DepartmentModel = require("../Model/DepartModel")
 const FacultyModel = require("../Model/FacultyModel")
 const crypto = require("crypto")
+const { LecturerLogin, IsAdmin, IsSuperAdmin } = require("../Middlewares/Middleware")
+
 
 
 const departRouter = express.Router()
 
 
 //Add a Faculty
-departRouter.post("/", async(req, res)=>{
+departRouter.post("/",LecturerLogin, IsAdmin,IsSuperAdmin, async(req, res)=>{
     try {
         const {name, faculty} = req.body
         const Faculty = await FacultyModel.findOne({faculty})
@@ -53,7 +55,7 @@ departRouter.get("/", async(req, res)=>{
 
 
 //update a department
-departRouter.put("/:id", async(req, res)=>{
+departRouter.put("/:id",LecturerLogin, IsAdmin,IsSuperAdmin, async(req, res)=>{
     try {
          const {name, faculty} = req.body
         const depart = await DepartmentModel.findById(req.params.id)
@@ -84,7 +86,7 @@ departRouter.put("/:id", async(req, res)=>{
 
 
 //delete a department
-departRouter.delete("/:id", async(req, res)=>{
+departRouter.delete("/:id",LecturerLogin, IsAdmin,IsSuperAdmin, async(req, res)=>{
     try {
         const depart = await DepartmentModel.findByIdAndDelete(req.params.id)
        if(depart){

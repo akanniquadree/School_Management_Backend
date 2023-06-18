@@ -55,6 +55,14 @@ const lecturerSchema = mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Department"
     },
+    isAdmin:{
+        type:Boolean,
+        default:false
+    },
+    isSuperAdmin:{
+        type:Boolean,
+        default:false
+    },
     myCourses:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Lecturer_courses"

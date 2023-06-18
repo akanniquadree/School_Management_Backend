@@ -160,8 +160,8 @@ lecturerAuthRouter.post("/lecturer/login", async(req, res)=>{
 
         //     //Token that will be sent to the client
          if(lecturer.verify){
-          const tokenHeader = jwt.sign({_id:lecturer._id},process.env.JWT_HEADER)
-          const {password,verify,...others} = user._doc
+          const tokenHeader = jwt.sign({_id:lecturer._id},process.env.JWT_ACTIVATION,{expiresIn:"12h"})
+          const {password,verify,...others} = lecturer._doc
           return res.status(200).json({tokenHeader, others})
          }
     } catch (error) {

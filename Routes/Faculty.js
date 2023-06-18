@@ -1,6 +1,7 @@
 const express = require("express")
 const FacultyModel = require("../Model/FacultyModel")
 const crypto = require("crypto")
+const { LecturerLogin, IsAdmin, IsSuperAdmin } = require("../Middlewares/Middleware")
 
 
 const facultyRouter = express.Router()
@@ -9,7 +10,7 @@ const facultyRouter = express.Router()
 
 
 //Add a Faculty
-facultyRouter.post("/", async(req, res)=>{
+facultyRouter.post("/",LecturerLogin, IsAdmin,IsSuperAdmin, async(req, res)=>{
     try {
         const {faculty} = req.body
         if(!faculty){
@@ -59,7 +60,7 @@ facultyRouter.get("/:id", async(req, res)=>{
 })
 
 //Update a Faculty
-facultyRouter.put("/:id", async(req, res)=>{
+facultyRouter.put("/:id",LecturerLogin, IsAdmin,IsSuperAdmin,async(req, res)=>{
     try {
         const {faculty} = req.body
         if(!faculty){
@@ -76,7 +77,7 @@ facultyRouter.put("/:id", async(req, res)=>{
 })
 
 //delete a Faculty
-facultyRouter.delete("/:id", async(req, res)=>{
+facultyRouter.delete("/:id",LecturerLogin, IsAdmin,IsSuperAdmin, async(req, res)=>{
     try {
         const fac = await FacultyModel.findByIdAndDelete(req.params.id)
         if(fac){
