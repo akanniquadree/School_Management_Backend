@@ -2,6 +2,8 @@ const express = require("express")
 const bcrypt = require("bcrypt")
 const cloudinary = require("cloudinary")
 const LecturerModel = require("../Model/LecturerModel")
+const DepartCourses = require("../Model/DepartCourseModel")
+const LectureCourseModel = require("../Model/LecturerCourse")
 
 
 
@@ -49,7 +51,6 @@ lecturerUserRouter.post("/newpassword/:id", async(req, res)=>{
 lecturerUserRouter.post("/image/:id", async(req, res)=>{
     try {
         const data = req.files.image
-        console.log(data)
         if(!data){
             return res.status(422).json({error:"Please insert an image"})
         }
@@ -71,6 +72,54 @@ lecturerUserRouter.post("/image/:id", async(req, res)=>{
     } catch (error) {
         console.log(error)
             return res.status(500).json(error)
+    }
+})
+
+
+//get all lecturer of a particular department
+// departCourseRouter.get("/depart", async(req, res)=>{
+//     try {
+//         const lecturers = await 
+//         if(newCourse){
+//             return res.status(200).json(newCourse)
+//         }
+//         return res.status(400).json({error:"Error in getting course"})
+//     } catch (error) {
+//         console.log(error)
+//             return res.status(500).json(error)
+//     }
+// })
+
+
+//Assigning Course to lecturer
+lecturerUserRouter.post("/courses", async(req, res)=>{
+    try {
+        const {course, lecturer} = req.body
+        if(!course || !lecturer){
+            return res.status(422).json({error:"Please fill all fields"})
+        }
+        const existCourse = await DepartCourses.findOne({name:course})
+        const existLecturer = await LecturerModel.findOne({first_name:lecturer})
+        if(!existCourse){
+            return res.status(422).json({error:"Course doesnt exist in our record"})
+        }
+        if(!existLecturer){
+            return res.status(422).json({error:"Lecturer doesnt exist in our record"})
+        }
+        const newCourse = new LectureCourseModel({
+            lecturer:existLecturer._id,
+            course:existCourse._id,
+            level:existCourse.level,
+            semester:existCourse.semester
+        })
+        const savedCourse = await newCourse.save()
+        if(savedCourse){
+            await existLecturer.updateOne({$push:{myCourses:savedCourse._id}})
+            return res.status(200).json({message:"Course assign to lecturer successfully"})
+        }
+    } catch (error) {
+            console.log(error)
+                return res.status(500).json(error)
     }
 })
 

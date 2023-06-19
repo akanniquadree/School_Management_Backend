@@ -19,6 +19,10 @@ courseFormRouter.get("/courseform/:id", StudentLogin,IsAuth,async(req, res)=>{
         if(!student){
             return res.status(422).json({error:"Cannot find Account"})
         }
+        const existCourseForm = await CourseFormModel.findOne({student:req.user._id})
+        if(existCourseForm.semester === student.semester || existCourseForm.level === student.level){
+            return res.status(422).json({error:"You have already submitted your course form"})
+        }
         //get courses of student department associated with user level
         const courses = depart.courses.filter((cour)=>cour.level === student.level)
         //get courses  user semester
@@ -43,6 +47,10 @@ courseFormRouter.post("/courseform/:id", StudentLogin,IsAuth, async(req, res)=>{
         const student = await StudentModel.findById(req.params.id)
         if(!student){
             return res.status(422).json({error:"Cannot find Account"})
+        }
+        const existCourseForm = await CourseFormModel.findOne({student:req.user._id})
+        if(existCourseForm.semester === student.semester || existCourseForm.level === student.level){
+            return res.status(422).json({error:"You have already submitted your course form"})
         }
         const courses = new CourseFormModel({
             level:student.level,

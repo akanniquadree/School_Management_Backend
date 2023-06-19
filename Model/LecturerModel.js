@@ -65,7 +65,7 @@ const lecturerSchema = mongoose.Schema({
     },
     myCourses:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Lecturer_courses"
+        ref:"LectureCourses"
     }],
     resetToken:String,
     expireToken:Date
