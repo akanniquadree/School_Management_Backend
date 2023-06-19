@@ -3,7 +3,7 @@ const dotenv = require("dotenv")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const nodemailer = require("nodemailer")
-const mailgun = require("nodemailer-mailgun-transport")
+const mailGun = require("nodemailer-mailgun-transport")
 const crypto = require("crypto")
 const Token = require("../Model/Token")
 const StudentModel = require("../Model/StudentModel")
@@ -13,11 +13,16 @@ const DepartmentModel = require("../Model/DepartModel")
 
 const studentAuthRouter = express.Router()
 dotenv.config()
-const auth = {auth:{
-    api_key:process.env.MAILGUN_API_KEY,
-    domain:process.env.DOMAIN
-}}
-const transporter = nodemailer.createTransport(mailgun(auth))
+const transporter = nodemailer.createTransport({
+    host:"smtp.gmail.com",
+    port:465,
+    secure:true,
+    debug:true,
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASS
+    }
+  })
 
 
 //Add a student
@@ -63,7 +68,7 @@ studentAuthRouter.post("/register", async(req, res)=>{
                 expireToken: Date.now() + 360000
             }).save()
             
-            const url = `${process.env.BASE_URL}/student/${student._id}/verify/${token.token}`
+            const url = `${process.env.BASE_URL}/student/${student._id}/verify/${jwtToken}`
             const send = {
                 to:student.email,
                 from:"akanniquadry7@gmail.com",
@@ -75,13 +80,13 @@ studentAuthRouter.post("/register", async(req, res)=>{
                     <p><a href="${url}">${url}</a></p>
                 `
             }
-        const succes =  transporter.sendMail(send)
-        if(succes){
-                return res.status(201).json({message: "A mail has been sent to your Email, please verify your email"})
-            }
-            else{
+        transporter.sendMail(send, function(err, data){
+            if(err){
+                console.log(err)
                 return res.status(404).json({error: "Email cannot be sent"})
             }
+            return res.status(201).json({message: "A mail has been sent to your Email, please verify your email"})
+        })
         }
         
     } catch (error) {
