@@ -4,6 +4,7 @@ const cloudinary = require("cloudinary")
 const LecturerModel = require("../Model/LecturerModel")
 const DepartCourses = require("../Model/DepartCourseModel")
 const LectureCourseModel = require("../Model/LecturerCourse")
+const { LecturerLogin, IsAdmin } = require("../Middlewares/Middleware")
 
 
 
@@ -76,7 +77,7 @@ lecturerUserRouter.post("/image/:id", async(req, res)=>{
 })
 
 
-//get all lecturer of a particular department
+//get all lecturer of a department
 // departCourseRouter.get("/depart", async(req, res)=>{
 //     try {
 //         const lecturers = await 
@@ -91,8 +92,10 @@ lecturerUserRouter.post("/image/:id", async(req, res)=>{
 // })
 
 
-//Assigning Course to lecturer
-lecturerUserRouter.post("/courses", async(req, res)=>{
+//Get all lecturers by department
+
+//Assigning Course to lecturer by admin
+lecturerUserRouter.post("/courses",LecturerLogin,IsAdmin, async(req, res)=>{
     try {
         const {course, lecturer} = req.body
         if(!course || !lecturer){
@@ -122,5 +125,7 @@ lecturerUserRouter.post("/courses", async(req, res)=>{
                 return res.status(500).json(error)
     }
 })
+
+
 
 module.exports = lecturerUserRouter

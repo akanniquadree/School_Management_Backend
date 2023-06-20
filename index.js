@@ -3,6 +3,7 @@ const dotenv = require("dotenv")
 const helmet = require("helmet")
 const morgan = require("morgan")
 const mongoose = require("mongoose")
+const cors = require("cors")
 const facultyRouter = require("./Routes/Faculty")
 const departRouter = require("./Routes/Department")
 const studentAuthRouter = require("./Routes/StudentAuth")
@@ -29,7 +30,7 @@ mongoose.connect(process.env.MONGODB_URL,{
 })
 
 
-
+app.use(cors())
 app.use(express.json({ extended: true }))
 app.use(helmet())
 app.use(morgan("common"))

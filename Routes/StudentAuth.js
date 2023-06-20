@@ -68,7 +68,7 @@ studentAuthRouter.post("/register", async(req, res)=>{
                 expireToken: Date.now() + 360000
             }).save()
             
-            const url = `${process.env.BASE_URL}/student/${student._id}/verify/${jwtToken}`
+            const url = `${process.env.BASE_URL}/student/${student._id}/verify/${token.token}`
             const send = {
                 to:student.email,
                 from:"akanniquadry7@gmail.com",
