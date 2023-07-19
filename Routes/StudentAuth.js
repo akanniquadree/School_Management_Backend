@@ -68,7 +68,7 @@ studentAuthRouter.post("/register", async(req, res)=>{
                 expireToken: Date.now() + 360000
             }).save()
             
-            const url = `${process.env.BASE_URL}/student/${student._id}/verify/${token.token}`
+            const url = `${process.env.BASE_URL}/student/${student._id}/verify/${jwtToken}`
             const send = {
                 to:student.email,
                 from:"akanniquadry7@gmail.com",
@@ -126,7 +126,7 @@ studentAuthRouter.post("/login", async(req, res)=>{
                  }).save()
 
                     //the url sent to the client email for verification
-                 const url = `${process.env.BASE_URL}/users/${student._id}/verify/${newToken.token}`
+                 const url = `${process.env.BASE_URL}/users/${student._id}/verify/${token}`
                  const send = {
                      to:student.email,
                      from:"akanniquadry7@gmail.com",
@@ -150,7 +150,7 @@ studentAuthRouter.post("/login", async(req, res)=>{
                 const savedToken = await Token.findOneAndUpdate({userId:student._id},{$set:{userId:student._id, token:token,expireToken: Date.now() + 360000}},{new:true})
                 //the url sent to the client email for verification
                 if(savedToken){
-                        const url = `${process.env.BASE_URL}/users/${student._id}/verify/${savedToken.token}`
+                        const url = `${process.env.BASE_URL}/users/${student._id}/verify/${token}`
                         const send = {
                             to:student.email,
                             from:"akanniquadry7@gmail.com",
