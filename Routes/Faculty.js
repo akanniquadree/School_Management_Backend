@@ -12,7 +12,7 @@ const facultyRouter = express.Router()
 //Add a Faculty
 facultyRouter.post("/",LecturerLogin, IsAdmin,IsSuperAdmin, async(req, res)=>{
     try {
-        const {faculty} = req.body
+        const {faculty, code} = req.body
         if(!faculty){
             return res.status(400).json({error:"Please fill all field"})
         }
@@ -20,7 +20,6 @@ facultyRouter.post("/",LecturerLogin, IsAdmin,IsSuperAdmin, async(req, res)=>{
         if(existingFac){
             return res.status(400).json({error:"Faculty already exist in our record"})
         }
-        const code = crypto.randomBytes(1).toString("hex")
         const fac = new FacultyModel({faculty, facultyCode:code})
         const saveFac = await fac.save()
         if(saveFac){

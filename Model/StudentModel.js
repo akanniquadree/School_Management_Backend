@@ -1,34 +1,37 @@
 const mongoose = require("mongoose")
 
 const studentSchema = mongoose.Schema({
+    surname:{
+        type:String,
+    },
     first_name:{
         type:String,
-        required:true,
-    },
-    last_name:{
-        type:String,
-        required:true,
-        min:3,
     },
     other_name:{
         type:String,
-        default:false
     },
     email:{
         type:String,
         required:true,
         unique:true,
-        trim:true
-    },
-    matric:{
-        type:String,
-        unique:true,
-        trim:true
+        trim:true,
+        lowercase:true
     },
     password:{
         type:String,
         required:true,
         min:5,
+        trim:true
+    },
+    gender:{
+        type:String,
+    },
+    add:{
+        type:String,
+    }, 
+    matric:{
+        type:String,
+        unique:true,
         trim:true
     },
     verify:{
@@ -37,12 +40,16 @@ const studentSchema = mongoose.Schema({
     },
     dob:{
         type:Date,
-        required:true,
         trim:true
+    },
+    origin:{
+        type:String,
+    },
+    height:{
+        type:String,
     },
     mobile:{
         type:String,
-        required:true,
         trim:true
     },
     profPic:{
@@ -51,17 +58,12 @@ const studentSchema = mongoose.Schema({
     },
     level:{
         type:String,
-        required:true,
         trim:true
     },
     semester:{
         type:String,
-        required:true,
         trim:true
     },
-    add:{
-        type:String,
-    }, 
     faculty:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Faculty"
@@ -74,6 +76,33 @@ const studentSchema = mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"CourseForm"
     }],
+    program:{
+        type:String,
+    },
+    hnd:{
+        type:String,
+        default:""
+    },
+    hnd_pic:{
+        type:String,
+        default:""
+    },
+    nd:{
+        type:String,
+        default:""
+    },
+    nd_pic:{
+        type:String,
+        default:""
+    },
+    ssce:{
+        type:String,
+        default:""
+    },
+    ssce_pic:{
+        type:String,
+        default:""
+    },
     resetToken:String,
     expireToken:Date
 },

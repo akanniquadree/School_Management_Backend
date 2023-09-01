@@ -28,11 +28,9 @@ const transporter = nodemailer.createTransport({
 //Add a student
 studentAuthRouter.post("/register", async(req, res)=>{
     try {
-        const {first_name, last_name,other_name, email, password, conPassword,dob, mobile, faculty, level,semester, depart, profPic, add} = req.body
-        const Faculty = await   FacultyModel.findOne({faculty})
-        const Depart = await   DepartmentModel.findOne({name:depart})
+        const {email, password, conPassword} = req.body
         const existEmail = await StudentModel.findOne({email})
-        if(!first_name || !last_name || !email || !password ||!semester || !conPassword || !dob || !mobile || !faculty || !level || !depart|| !add){
+        if(!email || !password || !conPassword){
             return res.status(400).json({error:"Please Fill all required field"})
         }
         if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){ 
@@ -41,25 +39,14 @@ studentAuthRouter.post("/register", async(req, res)=>{
         if(existEmail){
             return res.status(400).json({error:"Email already exist in our record"})
         }
-        if(!Faculty){
-            return res.status(400).json({error:"Faculty doesnot exist in our record"})
-        }
-        if(!Depart){
-            return res.status(400).json({error:"Department doesnot exist in our record"})
-        }
         if(password !== conPassword){
             return res.status(400).json({error:"Password does not match"})
         }
         const salt = await bcrypt.genSalt(13)
         const hashedPassword = await bcrypt.hash(password, salt)
-        const code = crypto.randomBytes(3).toString("hex")
-        const y = new Date()
-        const date = y.getUTCFullYear().toString()
-        console.log(date)
-        const user = new StudentModel({first_name,matric:date +"/"+Faculty.facultyCode +"/"+Depart.departCode+"/"+code, last_name,other_name, semester,email,faculty:Faculty._id,depart:Depart._id, password:hashedPassword, dob, mobile,level, profPic, add})
+        const user = new StudentModel({ email,password:hashedPassword})
         const student = await user.save()
         if(student){
-            await Depart.updateOne({$push:{students:student._id}})
             const jwtToken = crypto.randomBytes(32).toString("hex")
             const d = new Date()
             const token = new Token({
@@ -74,7 +61,6 @@ studentAuthRouter.post("/register", async(req, res)=>{
                 from:"akanniquadry7@gmail.com",
                 subject: "ACCOUNT VERIFICATION",
                 html:`
-                    <h4>Your Matric Number is ${student.matric}</h4>
                     <h4>Verify your email by clicking this </h4>
                     <p>${url}</p>
                     <p><a href="${url}">${url}</a></p>
@@ -95,17 +81,15 @@ studentAuthRouter.post("/register", async(req, res)=>{
     }
 })
 
-
-//sign in
+//Login
 studentAuthRouter.post("/login", async(req, res)=>{
     try {
         const {email, password} = req.body
-        //Checking for either the email or username and password field if they are empty 
-        let conditions = (email && email.indexOf("@") === -1) ? {matric:email} : {email:email} 
-        if(!conditions || !password) {
+     
+        if(!email || !password) {
             return res.status(422).json({error:"Please fill all fields"})
         }
-        const student = await StudentModel.findOne(conditions)
+        const student = await StudentModel.findOne({email})
         if(!student){
             return res.status(422).json({error:"You have entered a wrong email or password"})
         }
