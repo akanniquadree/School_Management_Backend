@@ -4,6 +4,9 @@ const bcrypt = require("bcrypt")
 const cloudinary = require("cloudinary")
 const { StudentLogin, IsAuth } = require("../Middlewares/Middleware")
 const ProgramModel = require("../Model/ProgramModel")
+const FacultyModel = require("../Model/FacultyModel")
+const DepartmentModel = require("../Model/DepartModel")
+const crypto = require("crypto")
 
 
 
@@ -48,11 +51,17 @@ StudentUserRouter.post("/newpassword/:id", StudentLogin,IsAuth, async(req, res)=
     }
 })
 
-StudentUserRouter.post("/registration/:id", async(req, res)=>{
+
+///registration
+StudentUserRouter.post("/registration/:id",StudentLogin, async(req, res)=>{
     try {
         const user = await StudentModel.findById(req.params.id)
-        const {first_name,program, surname,other_name,origin,height,dob,gender, mobile, faculty, level,semester, depart,hnd,hnd_pic,nd,nd_pic,ssce,ssce_pic, add} = req.body
-        if(!first_name || !surname || !semester ||!origin||!ssce ||!ssce_pic ||!gender ||!height || !dob || !mobile || !faculty || !level || !depart|| !add){
+        const data = req.files.hnd_pic
+        const data2 = req.files.nd_pic
+        const data3 = req.files.ssce_pic
+        console.log(data)
+        const {first_name,program, session,surname,other_name,origin,height,dob,gender, mobile, faculty, level,semester, depart,hnd,nd,ssce, add} = req.body
+        if(!first_name || !surname || !semester || !origin || !ssce || !gender || !height || !dob || !mobile || !faculty || !level || !depart || !add){
             return res.status(400).json({error:"Please Fill all required field"})
         }
         if (!user){ 
@@ -70,19 +79,22 @@ StudentUserRouter.post("/registration/:id", async(req, res)=>{
         if(!Program){
             return res.status(400).json({error:"Program doesnot exist in our record"})
         }
-        const Hnd_cloud = await cloudinary.uploader.upload(req.files.hnd_pic.tempFilePath,{
-            folder:`students/${user.email}`,
-            resource_type:"auto"
+        const Hnd_cloud = await cloudinary.uploader.upload(data.tempFilePath,function(res){},{
+            folder:`School_Pictures/Student/${user.email}`,
+            resource_type:"auto",
+            use_filename:true
         })
-        const Nd_cloud = await cloudinary.uploader.upload(req.files.nd_pic.tempFilePath,{
-            folder:`students/${user.email}`,
-            resource_type:"auto"
+        const Nd_cloud = await cloudinary.uploader.upload(data2.tempFilePath,function(res){},{
+            folder:`School_Pictures/Student/${user.email}`,
+            resource_type:"auto",
+            use_filename:true
         })
-        const Ssce_cloud = await cloudinary.uploader.upload(req.files.ssce_pic.tempFilePath,{
-            folder:`students/${user.email}`,
-            resource_type:"auto"
+        const Ssce_cloud = await cloudinary.uploader.upload(data3.tempFilePath,function(res){},{
+            folder:`School_Pictures/Student/${user.email}`,
+            resource_type:"auto",
+            use_filename:true
         })
-        const code = crypto.randomBytes(3).toString("hex")
+        const code = crypto.randomBytes(2).toString("hex")
         const y = new Date()
         const date = y.getUTCFullYear().toString()
         user.first_name = first_name
