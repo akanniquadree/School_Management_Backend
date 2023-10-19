@@ -110,7 +110,7 @@ studentAuthRouter.post("/login", async(req, res)=>{
                  }).save()
 
                     //the url sent to the client email for verification
-                 const url = `${process.env.BASE_URL}/users/${student._id}/verify/${token}`
+                 const url = `${process.env.BASE_URL}/student/${student._id}/verify/${token}`
                  const send = {
                      to:student.email,
                      from:"akanniquadry7@gmail.com",
